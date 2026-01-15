@@ -1,0 +1,38 @@
+# Dependências
+node_modules/
+
+# Build do Next.js
+.next/
+out/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Ambiente
+.env
+.env.*
+!.env.example
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Arquivos temporários
+*.tmp
+*.log
+
+# Backup e lixo
+*.bak
+*.old
+*.swp
+
+# Scripts locais (opcional)
+iniciar-servidor.bat
