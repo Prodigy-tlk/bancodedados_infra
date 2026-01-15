@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventário TI | Gestão de Acessos</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #1e293b;
+            --text-sec: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- Login --- */
+        #login-screen {
+            position: fixed; inset: 0; background: var(--bg);
+            display: flex; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .login-card {
+            background: var(--surface); padding: 2.5rem; border-radius: var(--radius);
+            box-shadow: var(--shadow); width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border);
+        }
+
+        /* --- App --- */
+        #app-screen { display: none; padding: 2rem; max-width: 1600px; margin: 0 auto; }
+
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 2rem; background: var(--surface); padding: 1.5rem;
+            border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow);
+        }
+
+        .header-title h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
+
+        .btn-logout {
+            background: #fee2e2; color: #991b1b; border: none; padding: 0.5rem 1rem;
+            border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; gap: 0.5rem; align-items: center;
+        }
+
+        /* --- Form --- */
+        .form-card {
+            background: var(--surface); padding: 2rem; border-radius: var(--radius);
+            border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 2rem;
+        }
+
+        .form-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
+
+        .form-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;
+        }
+
+        .section-title {
+            grid-column: 1 / -1; font-size: 0.85rem; font-weight: 700; 
+            color: var(--primary); text-transform: uppercase; margin-top: 1rem;
+            border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+        }
+
+        .input-group { display: flex; flex-direction: column; }
+        label { font-size: 0.8rem; font-weight: 600; color: var(--text-sec); margin-bottom: 0.4rem; }
+        input, select {
+            padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;
+            font-family: inherit; outline: none; background: #f8fafc; width: 100%;
+        }
+        input:focus { border-color: var(--primary); background: #fff; }
+
+        .btn {
+            padding: 0.75rem 1.5rem; border-radius: 8px; border: none; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .btn-primary { background: var(--primary); color: white; width: 100%; margin-top: 1.5rem; }
+        .btn-cancel { background: var(--text-sec); color: white; }
+
+        /* --- Table --- */
+        .table-wrapper {
+            background: var(--surface); border-radius: var(--radius);
+            box-shadow: var(--shadow); border: 1px solid var(--border); overflow-x: auto;
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+        th { background: #f1f5f9; text-align: left; padding: 1rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-sec); }
+        td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: top; }
+        
+        /* Credenciais e Senhas */
+        .cred-box {
+            background: #f8fafc; border: 1px solid var(--border); padding: 4px 8px;
+            border-radius: 6px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;
+        }
+        
+        .password-mask {
+            font-family: monospace; cursor: pointer; color: var(--text-sec); filter: blur(4px); user-select: none; margin-right: 8px;
+        }
+        .password-mask:hover, .password-mask.revealed { filter: blur(0); color: var(--text-main); }
+
+        /* Badges */
+        .badge { padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; display: inline-block; margin-top: 4px;}
+        .badge-chiaperini { background: #dbeafe; color: #1e40af; }
+        .badge-mercadao { background: #fee2e2; color: #991b1b; }
+
+        /* Botões de Ação */
+        .btn-icon { padding: 8px; background: transparent; border: none; cursor: pointer; border-radius: 6px; transition: 0.2s; }
+        .btn-icon:hover { background: #f1f5f9; transform: scale(1.1); }
+        
+        .btn-copy-mini { padding: 4px; color: var(--text-sec); cursor: pointer; display: flex; align-items: center;}
+        .btn-copy-mini:hover { color: var(--primary); background: #e0e7ff; border-radius: 4px;}
+
+        /* Toast */
+        #toast {
+            position: fixed; bottom: 2rem; right: 2rem; background: #1e293b; color: white;
+            padding: 1rem 1.5rem; border-radius: 8px; transform: translateY(150%); transition: 0.3s; z-index: 2000;
+            display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        #toast.show { transform: translateY(0); }
+
+        /* Clipboard invisível */
+        #signature-clipboard-container {
+            position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-card">
+            <h2>Acesso Restrito TI</h2>
+            <div style="margin: 1rem 0; text-align: left;">
+                <label>E-mail</label> <input type="email" id="loginEmail" placeholder="admin@empresa.com">
+            </div>
+            <div style="margin-bottom: 1.5rem; text-align: left;">
+                <label>Senha</label> <input type="password" id="loginPass" placeholder="••••••••">
+            </div>
+            <button id="btnLogin" class="btn btn-primary">Entrar</button>
+            <p id="loginError" style="color:var(--danger); margin-top:1rem; display:none;">Erro no login.</p>
+        </div>
+    </div>
+
+    <div id="app-screen">
+        <header>
+            <div class="header-title">
+                <h1>Gestão de Credenciais</h1>
+                <p style="color:var(--text-sec)">Registro de acessos e envio de credenciais</p>
+            </div>
+            <button id="btnLogout" class="btn-logout"><span class="material-icons-round">logout</span> Sair</button>
+        </header>
+
+        <div class="form-card">
+            <div class="form-header">
+                <h3 id="formTitle">Novo Colaborador</h3>
+                <button type="button" id="btnCancelEdit" class="btn btn-cancel" style="display:none; padding: 0.5rem 1rem;">Cancelar Edição</button>
+            </div>
+            <form id="tiForm">
+                <input type="hidden" id="docId">
+                
+                <div class="form-grid">
+                    <div class="section-title">Dados do Colaborador</div>
+                    <div class="input-group">
+                        <label>Empresa</label>
+                        <select id="empresa" required>
+                            <option value="">Selecione...</option>
+                            <option value="Chiaperini">Chiaperini</option>
+                            <option value="Mercadão Lojista">Mercadão Lojista</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Nome Completo</label>
+                        <input type="text" id="nome" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Cargo</label>
+                        <input type="text" id="cargo" required>
+                    </div>
+                    <div class="input-group">
+                        <label>E-mail Corporativo</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Ramal</label>
+                        <input type="number" id="ramal">
+                    </div>
+
+                    <div class="section-title">Rede & Windows</div>
+                    <div class="input-group">
+                        <label>Usuário PC (AD)</label>
+                        <input type="text" id="usuarioPc">
+                    </div>
+                    <div class="input-group">
+                        <label>Senha PC</label>
+                        <input type="text" id="senhaPc">
+                    </div>
+                    <div class="input-group">
+                        <label>Senha E-mail</label>
+                        <input type="text" id="senhaEmail">
+                    </div>
+                    <div class="input-group">
+                        <label>IP (IPv4)</label>
+                        <input type="text" id="ip">
+                    </div>
+
+                    <div class="section-title">Sistemas (Protheus / Orpen)</div>
+                    <div class="input-group">
+                        <label>Usuário Protheus</label>
+                        <input type="text" id="userProtheus">
+                    </div>
+                    <div class="input-group">
+                        <label>Senha Protheus</label>
+                        <input type="text" id="senhaProtheus">
+                    </div>
+                    <div class="input-group">
+                        <label>Usuário Orpen</label>
+                        <input type="text" id="userOrpen">
+                    </div>
+                    <div class="input-group">
+                        <label>Senha Orpen</label>
+                        <input type="text" id="senhaOrpen">
+                    </div>
+
+                    <div class="section-title">Microsoft Teams</div>
+                    <div class="input-group">
+                        <label>E-mail Teams</label>
+                        <input type="email" id="emailTeams">
+                    </div>
+                    <div class="input-group">
+                        <label>Senha Teams</label>
+                        <input type="text" id="senhaTeams">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="btnSubmit">
+                    <span class="material-icons-round">save</span> Salvar Registro
+                </button>
+            </form>
+        </div>
+
+        <div style="margin-bottom: 1rem; display: flex; gap: 1rem;">
+            <input type="text" id="searchInput" placeholder="Buscar por nome, empresa..." style="width: 100%; max-width: 400px; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border);">
+        </div>
+
+        <div class="table-wrapper">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th width="20%">Colaborador</th>
+                        <th width="15%">Acessos Rede</th>
+                        <th width="15%">Sistemas</th>
+                        <th width="15%">Outros</th>
+                        <th width="12%">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+            <div id="loading" style="text-align:center; padding: 2rem;">Carregando...</div>
+        </div>
+    </div>
+
+    <div id="signature-clipboard-container"></div>
+
+    <div id="toast">
+        <span class="material-icons-round">check_circle</span>
+        <span id="toastMsg">Copiado para área de transferência!</span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+        // -----------------------------------------------------------
+        // CONFIGURAÇÃO DO FIREBASE (SEU PROJETO)
+        // -----------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_JTgYh5-eJroKw3TG0uabPRLEl0cqiu8",
+            authDomain: "banco-de-dados-95f69.firebaseapp.com",
+            projectId: "banco-de-dados-95f69",
+            storageBucket: "banco-de-dados-95f69.firebasestorage.app",
+            messagingSenderId: "840265398728",
+            appId: "1:840265398728:web:bb6912cb31a724f9e9a8fd"
+        };
+        // -----------------------------------------------------------
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const dbCollection = collection(db, "colaboradores_ti");
+
+        let allData = [];
+
+        // Auth
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'block';
+                loadData();
+            } else {
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('app-screen').style.display = 'none';
+            }
+        });
+
+        document.getElementById('btnLogin').addEventListener('click', () => {
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPass').value;
+            signInWithEmailAndPassword(auth, email, pass).catch(err => {
+                document.getElementById('loginError').style.display = 'block';
+            });
+        });
+        document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
+
+        // CRUD
+        function loadData() {
+            const q = query(dbCollection, orderBy("nome"));
+            onSnapshot(q, (snapshot) => {
+                allData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderTable(allData);
+                document.getElementById('loading').style.display = 'none';
+            });
+        }
+
+        document.getElementById('tiForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true; btn.innerText = "Salvando...";
+            
+            const docId = document.getElementById('docId').value;
+            const data = {
+                empresa: document.getElementById('empresa').value,
+                nome: document.getElementById('nome').value,
+                cargo: document.getElementById('cargo').value,
+                email: document.getElementById('email').value,
+                ramal: document.getElementById('ramal').value,
+                usuarioPc: document.getElementById('usuarioPc').value,
+                senhaPc: document.getElementById('senhaPc').value,
+                senhaEmail: document.getElementById('senhaEmail').value,
+                ip: document.getElementById('ip').value,
+                userProtheus: document.getElementById('userProtheus').value,
+                senhaProtheus: document.getElementById('senhaProtheus').value,
+                userOrpen: document.getElementById('userOrpen').value,
+                senhaOrpen: document.getElementById('senhaOrpen').value,
+                emailTeams: document.getElementById('emailTeams').value,
+                senhaTeams: document.getElementById('senhaTeams').value,
+                updatedAt: new Date()
+            };
+
+            try {
+                if(docId) await updateDoc(doc(db, "colaboradores_ti", docId), data);
+                else { data.createdAt = new Date(); await addDoc(dbCollection, data); }
+                showToast("Registro salvo!");
+                resetForm();
+            } catch (err) { alert("Erro: " + err.message); }
+            finally { btn.disabled = false; btn.innerHTML = `<span class="material-icons-round">save</span> Salvar Registro`; }
+        });
+
+        function renderTable(list) {
+            const tbody = document.getElementById('tbody');
+            tbody.innerHTML = "";
+            
+            if(list.length === 0) {
+                 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem;">Nenhum registro encontrado.</td></tr>';
+                 return;
+            }
+            
+            list.forEach(item => {
+                const badgeClass = item.empresa === 'Chiaperini' ? 'badge-chiaperini' : 'badge-mercadao';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div style="font-weight:700;">${item.nome}</div>
+                        <div style="font-size:0.8rem; color:var(--text-sec)">${item.cargo || 'N/A'}</div>
+                        <span class="badge ${badgeClass}">${item.empresa || 'N/A'}</span>
+                        <div style="margin-top:4px; font-size:0.8rem">${item.email}</div>
+                    </td>
+                    <td>
+                        ${renderBox('PC', item.usuarioPc, item.senhaPc)}
+                        ${renderBox('E-mail', item.email, item.senhaEmail)}
+                    </td>
+                    <td>
+                        ${renderBox('Protheus', item.userProtheus, item.senhaProtheus)}
+                        ${renderBox('Orpen', item.userOrpen, item.senhaOrpen)}
+                    </td>
+                    <td>
+                        <div style="font-size:0.8rem; margin-bottom:4px;">Ramal: ${item.ramal || '-'}</div>
+                        <div style="font-size:0.8rem;">IP: ${item.ip || 'DHCP'}</div>
+                        ${item.senhaTeams ? renderBox('Teams', item.emailTeams, item.senhaTeams) : ''}
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                            <button class="btn-icon" onclick="openOutlook('${item.id}')" title="Enviar Senhas por E-mail">
+                                <span class="material-icons-round" style="color:var(--text-sec)">mail</span>
+                            </button>
+                            <button class="btn-icon" onclick="copySignature('${item.id}')" title="Copiar Assinatura com LOGO">
+                                <span class="material-icons-round" style="color:#0ea5e9">assignment</span>
+                            </button>
+                            <button class="btn-icon" onclick="editItem('${item.id}')" title="Editar">
+                                <span class="material-icons-round" style="color:var(--primary)">edit</span>
+                            </button>
+                            <button class="btn-icon" onclick="deleteItem('${item.id}')" title="Excluir">
+                                <span class="material-icons-round" style="color:var(--danger)">delete</span>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Função de Renderização das Caixinhas de Senha
+        function renderBox(label, user, pass) {
+            if(!user && !pass) return '';
+            const safePass = (pass || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            
+            return `
+                <div class="cred-box">
+                    <div>
+                        <span style="font-weight:700; color:var(--primary)">${label}:</span> 
+                        <span class="password-mask" onclick="this.classList.toggle('revealed')">${pass || '***'}</span>
+                    </div>
+                    <div class="btn-copy-mini" onclick="copyText('${safePass}')" title="Copiar Senha">
+                        <span class="material-icons-round" style="font-size:16px;">content_copy</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- GLOBAL WINDOW FUNCTIONS ---
+
+        // 1. Cópia de Senha (Correção para funcionar em HTTP/Rede Local)
+        window.copyText = (text) => {
+            if (!text) return;
+            
+            // Cria um textarea temporário (método fallback confiável)
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if(successful) showToast("Copiado para área de transferência!");
+                else throw new Error("Falha");
+            } catch (err) {
+                // Se falhar e estiver em ambiente seguro, tenta API nova
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(() => showToast("Copiado!"));
+                } else {
+                    alert("Não foi possível copiar automaticamente.");
+                }
+            }
+            document.body.removeChild(textArea);
+        };
+
+        // 2. Copiar Assinatura (LAYOUT EXATO DO OUTLOOK)
+        window.copySignature = (id) => {
+            const item = allData.find(d => d.id === id);
+            if (!item) return;
+
+            const isChiaperini = item.empresa === 'Chiaperini';
+            
+            // URLs das imagens locais
+            const logoUrl = isChiaperini 
+                ? "http://192.168.0.225:8000/media/logo-chiaperini.png" 
+                : "http://192.168.0.225:8000/media/logo-mercadao.png";
+            
+            // Ícones - se não carregar, usa emoji como fallback
+            const iconMail = "http://192.168.0.225:8000/media/icon-email.png";
+            const iconPhone = "http://192.168.0.225:8000/media/icon-phone.png";
+            const iconWeb = "http://192.168.0.225:8000/media/icon-web.png";
+
+            // Dados
+            const site = isChiaperini ? 'www.chiaperini.com.br' : 'www.mercadaolojista.com.br';
+            const tel = isChiaperini ? '(16) 3954-9400' : '(16) 3954-9415';
+            const ramalText = item.ramal ? ` – Ramal ${item.ramal}` : '';
+
+            // HTML - Layout EXATO: Nome/Cargo em cima | Logo + Contatos embaixo lado a lado
+            const htmlSignature = `
+<div style="font-family: Calibri, sans-serif; font-size: 12pt; color: #000;">
+    <!-- LINHA 1: Nome e Cargo -->
+    <p style="margin: 0 0 2px 0; font-size: 12pt; font-weight: bold;">
+        ${item.nome}
+    </p>
+    <p style="margin: 0 0 10px 0; font-size: 12pt; font-style: italic; color: #000;">
+        ${item.cargo}
+    </p>
+    
+    <!-- LINHA 2: Logo (esquerda) + Contatos (direita) -->
+    <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <!-- Logo -->
+            <td style="vertical-align: middle; padding-right: 50px;">
+                <img src="${logoUrl}" alt="${item.empresa}" width="250" height="54" style="display: block;">
+            </td>
+            
+            <!-- Contatos com ícones -->
+            <td style="vertical-align: middle;">
+                <table cellpadding="0" cellspacing="0" border="0" style="font-size: 11pt;">
+                    <!-- Email -->
+                    <tr>
+                        <td style="padding: 1px 3px 1px 0; vertical-align: middle;">
+                            <img src="${iconMail}" width="16" height="16" style="display: block;" onerror="this.style.display='none'">
+                        </td>
+                        <td style="padding: 1px 0; vertical-align: middle;">
+                            <a href="mailto:${item.email}" style="color: #0563c1; text-decoration: none; font-weight: bold;">${item.email}</a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Telefone -->
+                    <tr>
+                        <td style="padding: 1px 3px 1px 0; vertical-align: middle;">
+                            <img src="${iconPhone}" width="16" height="16" style="display: block;" onerror="this.style.display='none'">
+                        </td>
+                        <td style="padding: 1px 0; vertical-align: middle; font-weight: bold;">
+                            ${tel}${ramalText}
+                        </td>
+                    </tr>
+                    
+                    <!-- Website -->
+                    <tr>
+                        <td style="padding: 1px 3px 1px 0; vertical-align: middle;">
+                            <img src="${iconWeb}" width="16" height="16" style="display: block;" onerror="this.style.display='none'">
+                        </td>
+                        <td style="padding: 1px 0; vertical-align: middle;">
+                            <a href="http://${site}" style="color: #0563c1; text-decoration: none; font-weight: bold;">${site}</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+            `.trim();
+
+            // Processo de cópia
+            const container = document.getElementById('signature-clipboard-container');
+            container.innerHTML = htmlSignature;
+            
+            const range = document.createRange();
+            range.selectNode(container);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+
+            try {
+                document.execCommand('copy');
+                showToast("✅ Assinatura copiada! Cole no Outlook com Ctrl+V");
+            } catch (err) {
+                alert("❌ Erro ao copiar. Tente novamente.");
+            }
+            window.getSelection().removeAllRanges();
+        };
+
+        // 3. Utilitários Padrão
+        window.deleteItem = async (id) => {
+            if(confirm("Excluir este colaborador?")) await deleteDoc(doc(db, "colaboradores_ti", id));
+        };
+
+        window.editItem = (id) => {
+            const item = allData.find(d => d.id === id);
+            if(!item) return;
+            const fields = ['empresa','nome','cargo','email','ramal','usuarioPc','senhaPc','senhaEmail','ip',
+                          'userProtheus','senhaProtheus','userOrpen','senhaOrpen','emailTeams','senhaTeams'];
+            fields.forEach(f => {
+                if(document.getElementById(f)) document.getElementById(f).value = item[f] || '';
+            });
+            document.getElementById('docId').value = item.id;
+            document.getElementById('formTitle').innerText = "Editando Colaborador";
+            document.getElementById('btnCancelEdit').style.display = 'inline-block';
+            document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        document.getElementById('btnCancelEdit').addEventListener('click', resetForm);
+
+        function resetForm() {
+            document.getElementById('tiForm').reset();
+            document.getElementById('docId').value = "";
+            document.getElementById('formTitle').innerText = "Novo Colaborador";
+            document.getElementById('btnCancelEdit').style.display = 'none';
+        }
+
+        window.openOutlook = (id) => {
+            const item = allData.find(d => d.id === id);
+            if (!item) return;
+
+            const subject = `Bem-vindo(a) - Credenciais de Acesso | ${item.empresa}`;
+            let footerInfo = item.empresa === "Chiaperini" 
+                ? "Telefone: (16) 3954-9400\nSite: www.chiaperini.com.br"
+                : "Telefone: (16) 3954-9415\nSite: www.mercadaolojista.com.br";
+
+            const bodyText = `
+Olá ${item.nome},
+
+Seja bem-vindo(a)! Abaixo estão suas credenciais de acesso aos sistemas.
+
+------------------------------------------
+COMPUTADOR / REDE
+Usuário: ${item.usuarioPc || '-'}
+Senha: ${item.senhaPc || '-'}
+
+E-MAIL CORPORATIVO
+Email: ${item.email}
+Senha: ${item.senhaEmail || '-'}
+
+SISTEMA PROTHEUS
+Usuário: ${item.userProtheus || '-'}
+Senha: ${item.senhaProtheus || '-'}
+
+SISTEMA ORPEN
+Usuário: ${item.userOrpen || '-'}
+Senha: ${item.senhaOrpen || '-'}
+
+OUTROS
+Ramal: ${item.ramal || '-'}
+${item.emailTeams ? `Teams: ${item.emailTeams} (Senha: ${item.senhaTeams})` : ''}
+------------------------------------------
+
+* Recomendamos a troca das senhas no primeiro acesso.
+
+Atenciosamente,
+Departamento de TI
+
+${footerInfo}
+            `.trim();
+
+            window.location.href = `mailto:${item.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
+        };
+
+        document.getElementById('searchInput').addEventListener('keyup', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allData.filter(d => 
+                d.nome.toLowerCase().includes(term) || 
+                (d.empresa || '').toLowerCase().includes(term)
+            );
+            renderTable(filtered);
+        });
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>
