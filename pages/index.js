@@ -49,6 +49,7 @@ export default function Home() {
                 <select id="empresa" required>
                   <option value="">Selecione...</option>
                   <option value="Chiaperini">Chiaperini</option>
+                  <option value="Chiaperini PRO">Chiaperini PRO</option>
                   <option value="Mercadão Lojista">Mercadão Lojista</option>
                 </select>
               </div>

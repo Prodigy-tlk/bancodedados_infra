@@ -177,6 +177,7 @@
                         <select id="empresa" required>
                             <option value="">Selecione...</option>
                             <option value="Chiaperini">Chiaperini</option>
+                            <option value="Chiaperini PRO">Chiaperini PRO</option>
                             <option value="Mercadão Lojista">Mercadão Lojista</option>
                         </select>
                     </div>
@@ -378,7 +379,7 @@
             }
             
             list.forEach(item => {
-                const badgeClass = item.empresa === 'Chiaperini' ? 'badge-chiaperini' : 'badge-mercadao';
+                const badgeClass = item.empresa === 'Chiaperini' || item.empresa === 'Chiaperini PRO' ? 'badge-chiaperini' : 'badge-mercadao';
                 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -475,7 +476,7 @@
             const item = allData.find(d => d.id === id);
             if (!item) return;
 
-            const isChiaperini = item.empresa === 'Chiaperini';
+            const isChiaperini = item.empresa === 'Chiaperini' || item.empresa === 'Chiaperini PRO';
             
             // URLs das imagens locais
             const logoUrl = isChiaperini 
@@ -601,7 +602,7 @@
             if (!item) return;
 
             const subject = `Bem-vindo(a) - Credenciais de Acesso | ${item.empresa}`;
-            let footerInfo = item.empresa === "Chiaperini" 
+            let footerInfo = item.empresa === "Chiaperini" || item.empresa === "Chiaperini PRO"
                 ? "Telefone: (16) 3954-9400\nSite: www.chiaperini.com.br"
                 : "Telefone: (16) 3954-9415\nSite: www.mercadaolojista.com.br";
 

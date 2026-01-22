@@ -91,7 +91,7 @@ function renderTable(list) {
     }
     
     list.forEach(item => {
-        const badgeClass = item.empresa === 'Chiaperini' ? 'badge-chiaperini' : 'badge-mercadao';
+        const badgeClass = item.empresa === 'Chiaperini' || item.empresa === 'Chiaperini PRO' ? 'badge-chiaperini' : 'badge-mercadao';
         
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -126,7 +126,7 @@ function renderTable(list) {
                         <span class="material-icons-round" style="color:var(--primary)">edit</span>
                     </button>
                     <button class="btn-icon" onclick="deleteItem('${item.id}')" title="Excluir">
-                        <span className="material-icons-round" style="color:var(--danger)">delete</span>
+                        <span class="material-icons-round" style="color:var(--danger)">delete</span>
                     </button>
                 </div>
             </td>
@@ -180,7 +180,7 @@ window.copySignature = (id) => {
     const item = allData.find(d => d.id === id);
     if (!item) return;
 
-    const isChiaperini = item.empresa === 'Chiaperini';
+    const isChiaperini = item.empresa === 'Chiaperini' || item.empresa === 'Chiaperini PRO';
     const logoUrl = isChiaperini ? "/media/logo-chiaperini.png" : "/media/logo-mercadao.png";
     const iconMail = "/media/icon-email.png";
     const iconPhone = "/media/icon-phone.png";
@@ -284,7 +284,7 @@ window.openOutlook = (id) => {
     if (!item) return;
 
     const subject = `Bem-vindo(a) - Credenciais de Acesso | ${item.empresa}`;
-    let footerInfo = item.empresa === "Chiaperini" 
+    let footerInfo = item.empresa === "Chiaperini" || item.empresa === "Chiaperini PRO"
         ? "Telefone: (16) 3954-9400\nSite: www.chiaperini.com.br"
         : "Telefone: (16) 3954-9415\nSite: www.mercadaolojista.com.br";
 
